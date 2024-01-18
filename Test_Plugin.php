@@ -43,12 +43,36 @@ function plugin_activation()
     // $wpdb->query($insert_query);
 
     $data = array(
+        array(
+            'name' => 'akash',
+            'email' => 'akash@demo.com',
+            'status' => '1'
+        ),
+        array(
+            'name' => 'anmol',
+            'email' => 'anmol@demo.com',
+            'status' => '1'
+        ),
+        array(
+            'name' => 'akash',
+            'email' => 'akash@demo.com',
+            'status' => '1'
+        ),
+        array(
+            'name' => 'anuj',
+            'email' => 'anuj@demo.com',
+            'status' => '1'
+        )
 
-        'name' => 'akash',
-        'email' => 'akash@demo.com',
-        'status' => '1'
     );
-    $wpdb->insert($wp_mytable, $data);
+    
+    //insert single data
+    // $wpdb->insert($wp_mytable, $data);
+
+    //add more data
+    foreach ($data as $single_data) {
+        $wpdb->insert($wp_mytable, $single_data);
+    }
 }
 register_activation_hook(__FILE__, 'plugin_activation');
 
@@ -284,6 +308,37 @@ function views_count()
     global $post;
     return '<h3>Total views on site : ' . get_post_meta($post->ID, 'views', true) . '</h3>';
 }
-add_shortcode('views-counter', 'views_count')
+add_shortcode('views-counter', 'views_count');
+
+
+
+
+// add menu page
+
+function my_plugin_page_func()
+{
+    echo 'hihi from admin page';
+    include 'admin/my-admin-page.php';
+}
+
+function my_sub_menu_page_func()
+{
+    echo 'hihi from sub admin page';
+}
+
+
+function my_admin_menu_page()
+{
+
+    // add_menu_page( $page_title:string, $menu_title:string, $capability:string, $menu_slug:string, $callback:callable, $icon_url:string, $position:integer|float|null )
+    add_menu_page('My Custom menu', 'My Menu Page', 'manage_options', 'my-menu-page', 'my_plugin_page_func', '', 6);
+    // add_submenu_page( $parent_slug:string, $page_title:string, $menu_title:string, $capability:string, $menu_slug:string, $callback:callable, $position:integer|float|null )
+    add_submenu_page('my-menu-page', 'My main menu page title', 'My main menu page', 'manage_options', 'my-menu-page', 'my_plugin_page_func');
+
+
+    add_submenu_page('my-menu-page', 'My sub menu page title', 'My sub menu', 'manage_options', 'my-sub-menu', 'my_sub_menu_page_func');
+}
+
+add_action('admin_menu', 'my_admin_menu_page');
 
 ?>
