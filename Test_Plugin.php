@@ -324,6 +324,8 @@ function my_plugin_page_func()
 function my_sub_menu_page_func()
 {
     echo 'hihi from sub admin page';
+    include 'admin/my-sub-admin-page.php';
+
 }
 
 
@@ -335,10 +337,10 @@ function my_admin_menu_page()
     // add_submenu_page( $parent_slug:string, $page_title:string, $menu_title:string, $capability:string, $menu_slug:string, $callback:callable, $position:integer|float|null )
     add_submenu_page('my-menu-page', 'My main menu page title', 'My main menu page', 'manage_options', 'my-menu-page', 'my_plugin_page_func');
 
-
     add_submenu_page('my-menu-page', 'My sub menu page title', 'My sub menu', 'manage_options', 'my-sub-menu', 'my_sub_menu_page_func');
 }
 
 add_action('admin_menu', 'my_admin_menu_page');
+
 
 ?>
