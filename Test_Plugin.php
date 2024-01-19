@@ -65,7 +65,7 @@ function plugin_activation()
         )
 
     );
-    
+
     //insert single data
     // $wpdb->insert($wp_mytable, $data);
 
@@ -158,7 +158,8 @@ function my_custom_scripts()
 
     // ? is ternary opertor
     $is_login = is_user_logged_in() ? 1 : 0;
-    wp_add_inline_script('my_custom-javascript', 'var is_login =' . $is_login . ';', 'before');
+    // wp_add_inline_script('my_custom-javascript', 'var is_login =' . $is_login . ';', 'before');
+    wp_add_inline_script('my_custom-javascript', 'var ajaxUrl="' . admin_url('admin-ajax.php') . '";', 'before');
 };
 
 
@@ -205,6 +206,7 @@ function my_db_work()
         <thead>
             <tr>
                 <th>ID</th>
+                <th>Name</th>
                 <th>Email</th>
                 <th>Status</th>
             </tr>
@@ -215,6 +217,7 @@ function my_db_work()
             ?>
                 <tr>
                     <td><?php echo $row->ID; ?></td>
+                    <td><?php echo $row->name; ?></td>
                     <td><?php echo $row->email; ?></td>
                     <td><?php echo $row->status; ?></td>
                 </tr>
@@ -269,7 +272,7 @@ function my_posts()
             }
             ?>
         </ul>
-<?php
+    <?php
     endif;
     wp_reset_postdata();
     $html = ob_get_clean();
@@ -325,7 +328,6 @@ function my_sub_menu_page_func()
 {
     echo 'hihi from sub admin page';
     include 'admin/my-sub-admin-page.php';
-
 }
 
 
@@ -342,5 +344,46 @@ function my_admin_menu_page()
 
 add_action('admin_menu', 'my_admin_menu_page');
 
+
+// form function
+add_action('wp_ajax_my_search_func', 'my_search_func');
+function my_search_func()
+{
+    // echo 'hi ajax';
+    global $wpdb, $table_prefix;
+    $wp_mytable = $table_prefix . 'mytable';
+    $search_term = $_POST['search_term'];
+
+    // if (isset($_GET['my_search_term'])) {
+    if (!empty($search_term)) {
+        $q = "SELECT * FROM `$wp_mytable` WHERE `name` LIKE '%" . $search_term . "%'
+        OR `email` LIKE '%" . $search_term . "%';";
+    } else {
+        $q = "SELECT * FROM `$wp_mytable`;";
+    }
+    $results = $wpdb->get_results($q);
+    // echo  $search_term;
+    // echo '<pre>';
+    // print_r($results);
+    // echo '</pre>';
+    ob_start();
+    foreach ($results as $row) :
+    ?>
+        <tr>
+            <td><?php echo $row->ID; ?></td>
+            <td><?php echo $row->name; ?></td>
+            <td><?php echo $row->email; ?></td>
+            <td><?php echo $row->status; ?></td>
+        </tr>
+<?php
+    endforeach;
+    echo ob_get_clean();
+    wp_die();
+}
+
+
+// disply this in frontend
+add_shortcode( 'my-dbdb-data-show', 'my_db_data' );
+// include 'admin/my-admin-page.php';
 
 ?>
