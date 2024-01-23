@@ -345,7 +345,7 @@ function my_admin_menu_page()
 add_action('admin_menu', 'my_admin_menu_page');
 
 
-// form function
+// ajax form function
 add_action('wp_ajax_my_search_func', 'my_search_func');
 function my_search_func()
 {
@@ -383,7 +383,61 @@ function my_search_func()
 
 
 // disply this in frontend
-add_shortcode( 'my-dbdb-data-show', 'my_db_data' );
+add_shortcode('my-dbdb-data-show', 'my_db_data');
 // include 'admin/my-admin-page.php';
+
+
+// custom post types code 
+function register_my_cpt()
+{
+    $labels = array(
+        'name' => 'All Cars',
+        'singular_name' => 'Car',
+        // 'menu_name' => 'add new Cars' 
+    );
+    $supports = array(
+        'title', 'editor', 'thumbnail', 'comments', 'excerpts'
+    );
+    $options = array(
+        'labels' => $labels,
+        'public' => true,
+        'has_archive' => true,
+        'rewrite' => array(
+            'slug' => 'cars',
+        ),
+        'show_in_rest' => true,
+        'supports' => $supports,
+        'taxonomies' => array(
+            // 'category'
+            'car_type'
+        )
+    );
+    register_post_type('cars', $options);
+}
+
+// init is used here becoz after core files loaded my_cpt will start working 
+// Fires after WordPress has finished loading but before any headers are sent.
+add_action('init', 'register_my_cpt');
+
+// register category 
+function register_car_types()
+{
+    $labels = array(
+        'name' => 'Car Types',
+        'singular_name' => 'Car Types'
+    );
+    $options = array(
+        'labels' => $labels,
+        'hierarchical' => true,
+        'rewrite' => array(
+            'slug' => 'car-type',
+        ),
+        'show_in_rest' => true,
+    );
+    register_taxonomy('car-type', array('cars'), $options);
+}
+
+add_action('init', 'register_car_types');
+
 
 ?>
