@@ -440,4 +440,11 @@ function register_car_types()
 add_action('init', 'register_car_types');
 
 
+// register form 
+function my_register_form(){
+    ob_start();
+    include 'public/register-form.php';
+    return ob_get_clean();
+}
+add_shortcode( 'my-register-form', 'my_register_form');
 ?>
