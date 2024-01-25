@@ -447,4 +447,83 @@ function my_register_form(){
     return ob_get_clean();
 }
 add_shortcode( 'my-register-form', 'my_register_form');
+
+
+// login form
+
+
+function my_login_form(){
+    ob_start();
+    include 'public/login.php';
+    return ob_get_clean();
+}
+add_shortcode( 'my-login_form', 'my_login_form');
+
+
+function my_login(){
+
+    if(isset($_POST['user_login'])){
+        $username = esc_sql($_POST['username']);
+        $pass = esc_sql($_POST['pass']);
+        $credentials = array(
+            'user_login' => $username,
+            'user_password' => $pass,
+        );
+
+
+       $user = wp_signon($credentials);
+       if(!is_wp_error( $user )){
+        // echo 'Login Success';
+        wp_redirect(site_url('profile'));
+        // echo '<pre>';
+        // print_r($user);
+        // echo '</pre>';
+        if($user->roles[0] == 'administrator'){
+            wp_redirect( admin_url() );
+            exit;
+        }
+
+       }else{
+       echo $user->get_error_message();
+    //    wp_redirect(site_url('profile'));
+           wp_redirect(site_url());
+        }
+        return 'logininnmiminn';
+    }
+}
+add_action('template_redirect','my_login');
+
+
+
+// profile 
+function my_profile(){
+    ob_start();
+    include 'public/profile.php';
+    return ob_get_clean();
+}
+add_shortcode( 'my-profile', 'my_profile');
+
+
+function my_check_redirect(){
+$is_user_logged_in = is_user_logged_in(  );
+
+if($is_user_logged_in && (is_page ('login') || is_page( 'register' ) )){
+wp_redirect(site_url('profile'));
+exit;
+}elseif (!$is_user_logged_in && is_page('profile')){
+    wp_redirect(site_url('login'));
+exit;
+}
+
+}
+add_action('template_redirect','my_check_redirect');
+
+
+// redirect after logout 
+function redirect_after_logout(){
+    wp_redirect(site_url('login'));
+    exit;
+}
+
+add_action('wp_logout','redirect_after_logout');
 ?>
