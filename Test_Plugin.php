@@ -449,81 +449,52 @@ function my_register_form(){
 add_shortcode( 'my-register-form', 'my_register_form');
 
 
-// login form
 
+// custom restapi
 
-function my_login_form(){
-    ob_start();
-    include 'public/login.php';
-    return ob_get_clean();
+add_action('rest_api_init', 'my_custom_endpoint');
+
+function my_custom_endpoint() {
+    register_rest_route('Test_plugin/v1', '/data/', array(
+        'methods'  => 'GET',
+        'callback' => 'get_custom_data',
+    ));
 }
-add_shortcode( 'my-login_form', 'my_login_form');
+
+function get_custom_data() {
+    // Your custom logic to fetch and return data
+    $data = array('key' => 'valuee');
+    return rest_ensure_response($data);
+}
 
 
-function my_login(){
+// Register shortcode
+add_shortcode('custom_data_shortcode', 'custom_data_shortcode_function');
 
-    if(isset($_POST['user_login'])){
-        $username = esc_sql($_POST['username']);
-        $pass = esc_sql($_POST['pass']);
-        $credentials = array(
-            'user_login' => $username,
-            'user_password' => $pass,
-        );
-
-
-       $user = wp_signon($credentials);
-       if(!is_wp_error( $user )){
-        // echo 'Login Success';
-        wp_redirect(site_url('profile'));
-        // echo '<pre>';
-        // print_r($user);
-        // echo '</pre>';
-        if($user->roles[0] == 'administrator'){
-            wp_redirect( admin_url() );
-            exit;
-        }
-
-       }else{
-       echo $user->get_error_message();
-    //    wp_redirect(site_url('profile'));
-           wp_redirect(site_url());
-        }
-        return 'logininnmiminn';
+// Shortcode callback function
+function custom_data_shortcode_function($atts) {
+    // Make a request to your custom REST API endpoint
+    $response = wp_remote_get('http://plugin-dev.local/wp-json/Test_plugin/v1/data/');
+    
+    // Check if the request was successful
+    if (is_wp_error($response)) {
+        return 'Error fetching data'; // Display error message if request fails
+    }
+    
+    // Get the response body
+    $body = wp_remote_retrieve_body($response);
+    
+    // Decode the JSON response
+    $data = json_decode($body, true);
+    
+    // Check if data exists
+    if ($data && isset($data['key'])) {
+        // Output the data
+        return 'Data: ' . $data['key'];
+    } else {
+        return 'No data available';
     }
 }
-add_action('template_redirect','my_login');
 
 
-
-// profile 
-function my_profile(){
-    ob_start();
-    include 'public/profile.php';
-    return ob_get_clean();
-}
-add_shortcode( 'my-profile', 'my_profile');
-
-
-function my_check_redirect(){
-$is_user_logged_in = is_user_logged_in(  );
-
-if($is_user_logged_in && (is_page ('login') || is_page( 'register' ) )){
-wp_redirect(site_url('profile'));
-exit;
-}elseif (!$is_user_logged_in && is_page('profile')){
-    wp_redirect(site_url('login'));
-exit;
-}
-
-}
-add_action('template_redirect','my_check_redirect');
-
-
-// redirect after logout 
-function redirect_after_logout(){
-    wp_redirect(site_url('login'));
-    exit;
-}
-
-add_action('wp_logout','redirect_after_logout');
 ?>
